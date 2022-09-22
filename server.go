@@ -16,7 +16,6 @@ type postMessage struct {
 	Body   string `json:"body"`
 	Create string `json:"create"`
 	Due    string `json:"due"`
-	ID     uuid.UUID
 }
 
 type noteMessage struct {
@@ -68,12 +67,10 @@ func timeFormat(t string) (time.Time, error) {
 }
 
 func addNote(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("post add note")
 	var recivedNote postMessage
 	var noteToSave noteMessage
 	err := json.NewDecoder(req.Body).Decode(&recivedNote)
 	if err != nil {
-		fmt.Println("error json decode")
 		fmt.Println(err.Error())
 		res.WriteHeader(http.StatusInternalServerError)
 		res.Write([]byte(fmt.Sprintf("something went wrong with json parsing")))
@@ -93,7 +90,7 @@ func addNote(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte(fmt.Sprintf("something went wrong with time parsing")))
 		return
 	}
-	recivedNote.ID = uuid.New()
+	noteToSave.Id = uuid.New()
 
 	inSt := `INSERT INTO notes(Title, Body, CreateAt, Due, Id) values($1, $2, $3, $4, $5)`
 	_, err = db.Exec(inSt, noteToSave.Title, noteToSave.Body, noteToSave.Create, noteToSave.Due, noteToSave.Id)
@@ -113,22 +110,34 @@ func addNote(res http.ResponseWriter, req *http.Request) {
 
 func getNotes(res http.ResponseWriter, req *http.Request) {
 	fmt.Println("get see notes")
-	r, err := db.Query("SELECT * FROM notes")
+	rows, err := db.Query("SELECT * FROM notes")
 	if err != nil {
 		fmt.Println(err.Error())
 		res.WriteHeader(http.StatusInternalServerError)
 		res.Write([]byte(fmt.Sprintf("something went wrong with reading from db")))
 	}
-	defer r.Close()
-	var notes []string
-	var rs string
-	for r.Next() {
-		r.Scan(&rs)
-		fmt.Println(rs)
+	defer rows.Close()
+	var notes []noteMessage
+	var rs noteMessage
+	for rows.Next() {
+		var t string
+		var b string
+		var c time.Time
+		var d time.Time
+		var i uuid.UUID
+		rows.Scan(&t, &b, &c, &d, &i)
+		rs.Title = t
+		rs.Body = b
+		rs.Create = c
+		rs.Due = d
+		rs.Id = i
 		notes = append(notes, rs)
 	}
-	fmt.Println(notes)
-	fmt.Fprintf(res, "get notes")
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusCreated)
+	val := map[string][]noteMessage{"msg": notes}
+	jsonVal, _ := json.Marshal(val)
+	res.Write(jsonVal)
 
 }
 
