@@ -1,4 +1,4 @@
-module todolist
+module "github.com/altereitay/todolistapp"
 
 go 1.18
 
