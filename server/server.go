@@ -11,21 +11,6 @@ import (
 	"time"
 )
 
-type postMessage struct {
-	Title  string `json:"title"`
-	Body   string `json:"body"`
-	Create string `json:"create"`
-	Due    string `json:"due"`
-}
-
-type noteMessage struct {
-	Title  string
-	Body   string
-	Create time.Time
-	Due    time.Time
-	Id     uuid.UUID
-}
-
 var db *sql.DB
 
 func main() {
@@ -63,8 +48,8 @@ func timeFormat(t string) (time.Time, error) {
 }
 
 func addNote(res http.ResponseWriter, req *http.Request) {
-	var recivedNote postMessage
-	var noteToSave noteMessage
+	var recivedNote PostMessage
+	var noteToSave NoteMessage
 	err := json.NewDecoder(req.Body).Decode(&recivedNote)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -111,15 +96,15 @@ func getNotes(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte(fmt.Sprintf("something went wrong with reading from db")))
 	}
 	defer rows.Close()
-	var notes []noteMessage
-	var nm noteMessage
+	var notes []NoteMessage
+	var nm NoteMessage
 	for rows.Next() {
 		rows.Scan(&nm.Title, &nm.Body, &nm.Create, &nm.Due, &nm.Id)
 		notes = append(notes, nm)
 	}
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusOK)
-	val := map[string][]noteMessage{"msg": notes}
+	val := map[string][]NoteMessage{"msg": notes}
 	jsonVal, _ := json.Marshal(val)
 	res.Write(jsonVal)
 
@@ -152,12 +137,12 @@ func updateNote(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusInternalServerError)
 		res.Write([]byte(fmt.Sprintf("something went wrong with reading from db")))
 	}
-	var oldNote noteMessage
+	var oldNote NoteMessage
 	for rows.Next() {
 		rows.Scan(&oldNote.Title, &oldNote.Body, &oldNote.Create, &oldNote.Due, &oldNote.Id)
 	}
-	var recivedNote postMessage
-	var noteToSave noteMessage
+	var recivedNote PostMessage
+	var noteToSave NoteMessage
 	err = json.NewDecoder(req.Body).Decode(&recivedNote)
 	if err != nil {
 		fmt.Println(err.Error())
