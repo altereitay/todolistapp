@@ -26,10 +26,6 @@ type noteMessage struct {
 	Id     uuid.UUID
 }
 
-type ResponseStruct struct {
-	Msg string `json:"msg"`
-}
-
 var db *sql.DB
 
 func main() {
@@ -101,15 +97,13 @@ func addNote(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusCreated)
-	resp := ResponseStruct{
-		Msg: fmt.Sprintf("added new note"),
-	}
-	json.NewEncoder(res).Encode(resp)
+	res.WriteHeader(http.StatusOK)
+	resp := map[string]string{"msg": "added new note"}
+	respJson, _ := json.Marshal(resp)
+	res.Write(respJson)
 }
 
 func getNotes(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("get see notes")
 	rows, err := db.Query("SELECT * FROM notes")
 	if err != nil {
 		fmt.Println(err.Error())
@@ -118,23 +112,13 @@ func getNotes(res http.ResponseWriter, req *http.Request) {
 	}
 	defer rows.Close()
 	var notes []noteMessage
-	var rs noteMessage
+	var nm noteMessage
 	for rows.Next() {
-		var t string
-		var b string
-		var c time.Time
-		var d time.Time
-		var i uuid.UUID
-		rows.Scan(&t, &b, &c, &d, &i)
-		rs.Title = t
-		rs.Body = b
-		rs.Create = c
-		rs.Due = d
-		rs.Id = i
-		notes = append(notes, rs)
+		rows.Scan(&nm.Title, &nm.Body, &nm.Create, &nm.Due, &nm.Id)
+		notes = append(notes, nm)
 	}
 	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusCreated)
+	res.WriteHeader(http.StatusOK)
 	val := map[string][]noteMessage{"msg": notes}
 	jsonVal, _ := json.Marshal(val)
 	res.Write(jsonVal)
@@ -142,13 +126,65 @@ func getNotes(res http.ResponseWriter, req *http.Request) {
 }
 
 func deleteNote(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("delete note")
-	fmt.Fprintf(res, "delet note")
+	params := mux.Vars(req)
+	id := params["id"]
+	fmt.Println(id)
+	_, err := db.Exec(`DELETE FROM notes WHERE id=$1`, id)
+	if err != nil {
+		fmt.Println(err.Error())
+		res.WriteHeader(http.StatusInternalServerError)
+		res.Write([]byte(fmt.Sprintf("something went wrong with deleting from db")))
+	}
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusOK)
+	val := map[string]string{"msg": "deleted note"}
+	jsonVal, _ := json.Marshal(val)
+	res.Write(jsonVal)
 
 }
 
 func updateNote(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("put update note")
-	fmt.Fprintf(res, "update note")
+	params := mux.Vars(req)
+	id := params["id"]
+	rows, err := db.Query(`SELECT * FROM notes WHERE id=$1`, id)
+	if err != nil {
+		fmt.Println(err.Error())
+		res.WriteHeader(http.StatusInternalServerError)
+		res.Write([]byte(fmt.Sprintf("something went wrong with reading from db")))
+	}
+	var oldNote noteMessage
+	for rows.Next() {
+		rows.Scan(&oldNote.Title, &oldNote.Body, &oldNote.Create, &oldNote.Due, &oldNote.Id)
+	}
+	var recivedNote postMessage
+	var noteToSave noteMessage
+	err = json.NewDecoder(req.Body).Decode(&recivedNote)
+	if err != nil {
+		fmt.Println(err.Error())
+		res.WriteHeader(http.StatusInternalServerError)
+		res.Write([]byte(fmt.Sprintf("something went wrong with json parsing")))
+		return
+	}
+	noteToSave.Title = recivedNote.Title
+	noteToSave.Body = recivedNote.Body
+	noteToSave.Create, err = timeFormat(recivedNote.Create)
+	if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+		res.Write([]byte(fmt.Sprintf("something went wrong with time parsing")))
+		return
+	}
+	noteToSave.Due, err = timeFormat(recivedNote.Due)
+	if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+		res.Write([]byte(fmt.Sprintf("something went wrong with time parsing")))
+		return
+	}
+	noteToSave.Id = oldNote.Id
+	db.Exec(`UPDATE notes SET title=$1, body=$2, createat=$3, due=$4 WHERE id=$5`, noteToSave.Title, noteToSave.Body, noteToSave.Create, noteToSave.Due, oldNote.Id)
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusOK)
+	val := map[string]string{"msg": "updated note"}
+	jsonVal, _ := json.Marshal(val)
+	res.Write(jsonVal)
 
 }
