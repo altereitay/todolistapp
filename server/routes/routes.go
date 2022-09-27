@@ -22,6 +22,7 @@ func timeFormat(t string) (time.Time, error) {
 }
 
 func AddNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
+	res.Header().Set("Access-Control-Allow-Origin", "*")
 	var recivedNote types.PostMessage
 	var noteToSave types.NoteMessage
 	err := json.NewDecoder(req.Body).Decode(&recivedNote)
@@ -63,6 +64,7 @@ func AddNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 }
 
 func GetNotes(res http.ResponseWriter, req *http.Request, db *sql.DB) {
+	res.Header().Set("Access-Control-Allow-Origin", "*")
 	rows, err := db.Query("SELECT * FROM notes")
 	if err != nil {
 		fmt.Println(err.Error())
@@ -85,6 +87,7 @@ func GetNotes(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 }
 
 func DeleteNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
+	res.Header().Set("Access-Control-Allow-Origin", "*")
 	params := mux.Vars(req)
 	id := params["id"]
 	fmt.Println(id)
@@ -103,6 +106,7 @@ func DeleteNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 }
 
 func UpdateNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
+	res.Header().Set("Access-Control-Allow-Origin", "*")
 	params := mux.Vars(req)
 	id := params["id"]
 	rows, err := db.Query(`SELECT * FROM notes WHERE id=$1`, id)

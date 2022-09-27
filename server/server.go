@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/altereitay/todolistapp/routes"
 	_ "github.com/altereitay/todolistapp/types"
 	"github.com/gorilla/mux"
@@ -27,6 +28,7 @@ func main() {
 	router.HandleFunc("/note/{id}", func(w http.ResponseWriter, r *http.Request) {
 		routes.UpdateNote(w, r, db)
 	}).Methods("PUT")
+	fmt.Println("server running on port 8080")
 	http.ListenAndServe(":8080", router)
 
 }
