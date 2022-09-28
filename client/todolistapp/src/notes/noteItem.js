@@ -22,7 +22,7 @@ const getTimeDiffrence = (due) => {
 const NoteItem = (props) => {
     const [summary, setSummary] = useState(true);
     return (
-        <div style={{maxHeight: '400px', maxWidth: '55    0px'}}>
+        <div style={{maxHeight: '400px', maxWidth: '550px'}}>
             {
                 summary ?
                     <div key={props.note.Id} style={{margin: '1px'}}>
@@ -47,4 +47,4 @@ const NoteItem = (props) => {
     )
 }
 
-export default NoteItem
+export default NoteItem;

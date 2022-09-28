@@ -1,6 +1,7 @@
 import './App.css';
 import axios from "axios";
 import NoteItem from "./notes/noteItem";
+import NewNote from "./notes/newNote";
 import React, {useEffect, useState} from "react";
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
 
                 }
             </div>
+            <NewNote />
             <button style={{height: '20px', width: '75px'}}>Add Note</button>
         </div>
     );
