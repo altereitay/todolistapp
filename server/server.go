@@ -18,16 +18,20 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/note", func(w http.ResponseWriter, r *http.Request) {
 		routes.AddNote(w, r, db)
-	}).Methods("POST")
+	}).Methods("POST", "OPTIONS")
+
 	router.HandleFunc("/note", func(w http.ResponseWriter, r *http.Request) {
 		routes.GetNotes(w, r, db)
-	}).Methods("GET")
+	}).Methods("GET", "OPTIONS")
+
 	router.HandleFunc("/note/{id}", func(w http.ResponseWriter, r *http.Request) {
 		routes.DeleteNote(w, r, db)
-	}).Methods("DELETE")
+	}).Methods("DELETE", "OPTIONS")
+
 	router.HandleFunc("/note/{id}", func(w http.ResponseWriter, r *http.Request) {
 		routes.UpdateNote(w, r, db)
-	}).Methods("PUT")
+	}).Methods("PUT", "OPTIONS")
+
 	fmt.Println("server running on port 8080")
 	http.ListenAndServe(":8080", router)
 

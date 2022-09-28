@@ -1,18 +1,6 @@
 import React, {useState} from "react";
 import '../actions/notes'
 
-
-const getTimeSplitted = (date) => {
-    let bigs = date.split('T')[0].split('-');
-    let smellss = date.split('T')[1].slice(0, 8).split(':');
-    let split = {};
-    split.year = parseInt(bigs[0]);
-    split.month = parseInt(bigs[1]);
-    split.day = parseInt(bigs[2]);
-    split.hour = parseInt(smellss[0]);
-    split.mintue = parseInt(smellss[1]);
-    return split;
-}
 const getTimeDiffrence = (due) => {
     let currTimeStamp = new Date().getTime();
     let dueTimeStamp = new Date(due).getTime();
@@ -38,10 +26,9 @@ const NoteItem = (props) => {
             {
                 summary ?
                     <div key={props.note.Id} style={{margin: '1px'}}>
-                        <p>Title: {props.note.Title}
-                            Time to finish:{getTimeDiffrence(props.note.Due)}
+                        Title: {props.note.Title} Time to finish:{getTimeDiffrence(props.note.Due)}
                             <button onClick={() => setSummary(!summary)}>Full Note</button>
-                        </p>
+
                     </div>
                     :
                     <div key={props.note.Id} style={{margin: '1px', grid: 'flex'}}>
@@ -50,7 +37,7 @@ const NoteItem = (props) => {
                         <p>Created at: {props.note.Create}</p>
                         <p>Due to: {props.note.Due}</p>
                         <p>Time to finish:{getTimeDiffrence(props.note.Due)}</p>
-                        <button onClick={() => console.log(props.note.Id)}>Finish</button>
+                        <button onClick={() => props.deleteing(props.note.Id)}>Finish</button>
                         <button onClick={() => setSummary(!summary)}>Exit</button>
                     </div>
 

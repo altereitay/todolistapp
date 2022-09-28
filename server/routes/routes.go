@@ -22,7 +22,11 @@ func timeFormat(t string) (time.Time, error) {
 }
 
 func AddNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
+	fmt.Println("POST add note")
 	res.Header().Set("Access-Control-Allow-Origin", "*")
+	res.Header().Set("Access-Control-Allow-Methods", "OPTIONS")
+	res.Header().Set("Access-Control-Allow-Methods", "POST")
+	res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	var recivedNote types.PostMessage
 	var noteToSave types.NoteMessage
 	err := json.NewDecoder(req.Body).Decode(&recivedNote)
@@ -64,7 +68,11 @@ func AddNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 }
 
 func GetNotes(res http.ResponseWriter, req *http.Request, db *sql.DB) {
+	fmt.Println("GET notes")
 	res.Header().Set("Access-Control-Allow-Origin", "*")
+	res.Header().Set("Access-Control-Allow-Methods", "OPTIONS")
+	res.Header().Set("Access-Control-Allow-Methods", "GET")
+	res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	rows, err := db.Query("SELECT * FROM notes")
 	if err != nil {
 		fmt.Println(err.Error())
@@ -88,9 +96,11 @@ func GetNotes(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 
 func DeleteNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 	res.Header().Set("Access-Control-Allow-Origin", "*")
+	res.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	res.Header().Set("Access-Control-Allow-Methods", "OPTIONS, DELETE")
 	params := mux.Vars(req)
 	id := params["id"]
-	fmt.Println(id)
+	fmt.Println("delete note", id)
 	_, err := db.Exec(`DELETE FROM notes WHERE id=$1`, id)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -107,8 +117,12 @@ func DeleteNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 
 func UpdateNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 	res.Header().Set("Access-Control-Allow-Origin", "*")
+	res.Header().Set("Access-Control-Allow-Methods", "OPTIONS")
+	res.Header().Set("Access-Control-Allow-Methods", "PUT")
+	res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	params := mux.Vars(req)
 	id := params["id"]
+	fmt.Println("PUT update note", id)
 	rows, err := db.Query(`SELECT * FROM notes WHERE id=$1`, id)
 	if err != nil {
 		fmt.Println(err.Error())

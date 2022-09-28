@@ -1,11 +1,12 @@
 import './App.css';
+import axios from "axios";
 import NoteItem from "./notes/noteItem";
 import React, {useEffect, useState} from "react";
 
 function App() {
     const [notes, setNotes] = useState(undefined)
     useEffect(() => {
-        (async function() {
+        (async function () {
                 try {
                     let data = await fetch('http://localhost:8080/note', {
                         method: 'GET',
@@ -13,30 +14,54 @@ function App() {
                     })
                     let jsonresp = await data.json()
                     setNotes(jsonresp);
-                }catch (e) {
+                } catch (e) {
                     console.error(e)
                 }
             }
         )()
     }, [])
 
-  return (
-      <div style={{display:"flex", backgroundColor:'lightblue'}}>
-          <div>
-          {
-              notes ? notes.msg.map(note => {
-                  console.log(note)
-                      return (
-                          <NoteItem note = {note} />
-                      )
-                  })
-                  :(<div>error</div>)
+    async function deleteNote(id) {
+        try {
+            // let d = await fetch(`http://localhost:8080/note/${id}`, {
+            //     method: 'DELETE',
+            //     headers:{
+            //         'Access-Control-Allow-Origin': '*',
+            //         'Content-Type': 'application/json'
+            //     }
+            //
+            // })
+            // let js = await d.json();
+            // console.log(js)
+            await axios.delete(`http://localhost:8080/note/${id}`)
+            let data = await fetch('http://localhost:8080/note', {
+                method: 'GET',
+                'Content-Type': 'application/json'
+            })
+            let jsonresp = await data.json()
+            setNotes(jsonresp);
+        } catch (e) {
+            console.error(e)
+        }
+    }
 
-          }
-          </div>
-          <button style={{height: '20px', width: '75px'}}>Add Note</button>
-      </div>
-  );
+
+    return (
+        <div style={{display: "flex", backgroundColor: 'lightblue'}}>
+            <div>
+                {
+                    notes ? notes.msg.map(note => {
+                            return (
+                                <NoteItem key={note.Id} note={note} deleteing={deleteNote}/>
+                            )
+                        })
+                        : (<div>error</div>)
+
+                }
+            </div>
+            <button style={{height: '20px', width: '75px'}}>Add Note</button>
+        </div>
+    );
 }
 
 export default App;
