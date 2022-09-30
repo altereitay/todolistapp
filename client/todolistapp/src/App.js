@@ -5,6 +5,7 @@ import NewNote from "./notes/newNote";
 import React, {useEffect, useState} from "react";
 
 function App() {
+    const [addNote, setAddNote] = useState(false);
     const [notes, setNotes] = useState(undefined)
     useEffect(() => {
         (async function () {
@@ -24,20 +25,9 @@ function App() {
 
     async function deleteNote(id) {
         try {
-            // let d = await fetch(`http://localhost:8080/note/${id}`, {
-            //     method: 'DELETE',
-            //     headers:{
-            //         'Access-Control-Allow-Origin': '*',
-            //         'Content-Type': 'application/json'
-            //     }
-            //
-            // })
-            // let js = await d.json();
-            // console.log(js)
             await axios.delete(`http://localhost:8080/note/${id}`)
             let data = await fetch('http://localhost:8080/note', {
                 method: 'GET',
-                'Content-Type': 'application/json'
             })
             let jsonresp = await data.json()
             setNotes(jsonresp);
@@ -60,8 +50,13 @@ function App() {
 
                 }
             </div>
-            <NewNote />
-            <button style={{height: '20px', width: '75px'}}>Add Note</button>
+            <button style={{height: '20px', width: '75px'}} onClick={()=>setAddNote(true)}>Add Note</button>
+            {
+                addNote?
+                <NewNote setAddNote={setAddNote}/>
+                    :
+                    <div></div>
+            }
         </div>
     );
 }

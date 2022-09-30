@@ -21,12 +21,18 @@ func timeFormat(t string) (time.Time, error) {
 	return tim, nil
 }
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 func AddNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
-	fmt.Println("POST add note")
+	enableCors(&res)
 	res.Header().Set("Access-Control-Allow-Origin", "*")
-	res.Header().Set("Access-Control-Allow-Methods", "OPTIONS")
-	res.Header().Set("Access-Control-Allow-Methods", "POST")
-	res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	//res.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	res.Header().Set("Access-Control-Allow-Headers", "*")
+	//res.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST")
+	res.Header().Set("Access-Control-Allow-Methods", "*")
+	fmt.Println("POST add note")
 	var recivedNote types.PostMessage
 	var noteToSave types.NoteMessage
 	err := json.NewDecoder(req.Body).Decode(&recivedNote)
@@ -69,6 +75,7 @@ func AddNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 
 func GetNotes(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 	fmt.Println("GET notes")
+	enableCors(&res)
 	res.Header().Set("Access-Control-Allow-Origin", "*")
 	res.Header().Set("Access-Control-Allow-Methods", "OPTIONS")
 	res.Header().Set("Access-Control-Allow-Methods", "GET")
@@ -95,6 +102,7 @@ func GetNotes(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 }
 
 func DeleteNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
+	enableCors(&res)
 	res.Header().Set("Access-Control-Allow-Origin", "*")
 	res.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	res.Header().Set("Access-Control-Allow-Methods", "OPTIONS, DELETE")
@@ -116,6 +124,7 @@ func DeleteNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
 }
 
 func UpdateNote(res http.ResponseWriter, req *http.Request, db *sql.DB) {
+	enableCors(&res)
 	res.Header().Set("Access-Control-Allow-Origin", "*")
 	res.Header().Set("Access-Control-Allow-Methods", "OPTIONS")
 	res.Header().Set("Access-Control-Allow-Methods", "PUT")

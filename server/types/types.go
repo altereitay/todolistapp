@@ -8,7 +8,7 @@ import (
 type PostMessage struct {
 	Title  string `json:"title"`
 	Body   string `json:"body"`
-	Create string `json:"create"`
+	Create string `json:"createAt"`
 	Due    string `json:"due"`
 }
 
